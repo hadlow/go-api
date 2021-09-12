@@ -6,6 +6,11 @@ import (
 
 // External
 import (
+	"github.com/gorilla/mux"
+)
+
+// External
+import (
 	// bolt "go.etcd.io/bbolt"
 	// "github.com/gorilla/mux"
 )
@@ -16,13 +21,22 @@ type Post struct {
 	body string `json:"body"`
 }
 
-func all(w http.ResponseWriter, r *http.Request) {
+func PostsApi(api *mux.Router) {
+	api.HandleFunc("/posts", AllPosts).Methods(http.MethodGet)
+	api.HandleFunc("/posts/{id}", GetPosts).Methods(http.MethodGet)
+	api.HandleFunc("/posts", PostPosts).Methods(http.MethodPost)
+	api.HandleFunc("/posts/{id}", PutPosts).Methods(http.MethodPut)
+	api.HandleFunc("/posts/{id}", DeletePosts).Methods(http.MethodDelete)
+}
+
+func AllPosts(w http.ResponseWriter, r *http.Request) {
+	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "hello world"}`))
 }
 
-func get(w http.ResponseWriter, r *http.Request) {
+func GetPosts(w http.ResponseWriter, r *http.Request) {
 	// vars := mux.Vars(r)
 	// vars["id"]
 
@@ -31,19 +45,19 @@ func get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"message": "hello world"}`))
 }
 
-func post(w http.ResponseWriter, r *http.Request) {
+func PostPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "hello world"}`))
 }
 
-func put(w http.ResponseWriter, r *http.Request) {
+func PutPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "hello world"}`))
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+func DeletePosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "hello world"}`))
