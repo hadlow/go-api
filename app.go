@@ -13,24 +13,26 @@ import (
 
 type App struct {
 	router *mux.Router
-	db database
+	db Database
 }
 
 func (a *App) Initialize(dbPath string) {
-	a.Router = mux.NewRouter()
+	a.router = mux.NewRouter()
 
 	// Get the database from whatever file is in the config
-	database, close, err := database.NewDatabase(config.Database)
+	database, close, err := NewDatabase(dbPath)
 
 	database.SetBucket("main")
 
 	if err != nil {
 		log.Fatal("Error opening database")
 	}
+
+	defer close()
 }
 
 func (a *App) Run(addr string) {
-	api := a.Router.PathPrefix("/api").Subrouter()
+	api := a.router.PathPrefix("/api").Subrouter()
 
     api.HandleFunc("/posts", all).Methods(http.MethodGet)
 	api.HandleFunc("/posts/{id}", get).Methods(http.MethodGet)
@@ -38,5 +40,5 @@ func (a *App) Run(addr string) {
 	api.HandleFunc("/posts/{id}", put).Methods(http.MethodPut)
 	api.HandleFunc("/posts/{id}", delete).Methods(http.MethodDelete)
 
-    log.Fatal(http.ListenAndServe(":8080", a.Router))
+    log.Fatal(http.ListenAndServe(":8080", a.router))
 }

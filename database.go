@@ -60,7 +60,7 @@ func (d *Database) Set(key string, value []byte) error {
 	})
 }
 
-func (d *Database) Delete(key string) {
+func (d *Database) Delete(key string) error {
 	return d.connection.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(d.bucket)
 
@@ -68,7 +68,7 @@ func (d *Database) Delete(key string) {
 	})
 }
 
-func (d *Database) BulkDelete(keys []string) {
+func (d *Database) BulkDelete(keys []string) error {
 	return d.connection.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(d.bucket)
 
@@ -79,5 +79,7 @@ func (d *Database) BulkDelete(keys []string) {
 				return err
 			}
 		}
+
+		return nil
 	})
 }
