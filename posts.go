@@ -1,64 +1,68 @@
 package main
 
 import (
+	"log"
 	"net/http"
-)
-
-// External
-import (
-	"github.com/gorilla/mux"
-)
-
-// External
-import (
-	// bolt "go.etcd.io/bbolt"
-	// "github.com/gorilla/mux"
+	"encoding/json"
+	"io"
+	"time"
 )
 
 type Post struct {
-	id int `json:"id"`
-	title string `json:"title"`
-	body string `json:"body"`
+	ID int     `json:"id"`
+	Title string  `json:"title"`
+	Content string `json:"content"`
+	CreatedOn string  `json:"-"`
+	UpdatedOn string  `json:"-"`
+	DeletedOn string  `json:"-"`
 }
 
-func PostsApi(api *mux.Router) {
-	api.HandleFunc("/posts", AllPosts).Methods(http.MethodGet)
-	api.HandleFunc("/posts/{id}", GetPosts).Methods(http.MethodGet)
-	api.HandleFunc("/posts", PostPosts).Methods(http.MethodPost)
-	api.HandleFunc("/posts/{id}", PutPosts).Methods(http.MethodPut)
-	api.HandleFunc("/posts/{id}", DeletePosts).Methods(http.MethodDelete)
+type Posts []*Post
+
+func (p *Post) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(p)
 }
 
-func AllPosts(w http.ResponseWriter, r *http.Request) {
-	
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+func GetPosts() Posts {
+	return postsList
 }
 
-func GetPosts(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	// vars["id"]
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+var postsList = []*Post {
+	&Post{
+		ID: 1,
+		Title: "Latte",
+		Content: "Frothy milky coffee",
+		CreatedOn: time.Now().UTC().String(),
+		UpdatedOn: time.Now().UTC().String(),
+	},
 }
 
-func PostPosts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+type PostsApi struct {
+	l *log.Logger
 }
 
-func PutPosts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+func NewPostsApi(l *log.Logger) *PostsApi {
+	return &PostsApi{l}
 }
 
-func DeletePosts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "hello world"}`))
+func (p *PostsApi) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		p.getPosts(rw, r)
+		return
+	}
+
+	rw.WriteHeader(http.StatusMethodNotAllowed)
+}
+
+func (p *PostsApi) getPosts(rw http.ResponseWriter, r *http.Request) {
+	p.l.Println("Handle GET Posts")
+
+	lp := GetPosts()
+
+	err := lp.ToJSON(rw)
+
+	if err != nil {
+		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
+	}
 }
