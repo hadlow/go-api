@@ -18,7 +18,7 @@ func main() {
 	sm.Handle("/", ph)
 
 	s := http.Server{
-		Addr: "127.0.0.1",
+		Addr: "127.0.0.1:8080",
 		Handler: sm,
 		ErrorLog: l,
 		ReadTimeout: 5 * time.Second,
@@ -27,9 +27,10 @@ func main() {
 	}
 
 	go func() {
-		l.Println("Starting server on port 9090")
+		l.Println("Starting server on port 8080")
 
 		err := s.ListenAndServe()
+
 		if err != nil {
 			l.Printf("Error starting server: %s\n", err)
 			os.Exit(1)

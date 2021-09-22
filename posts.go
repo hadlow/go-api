@@ -19,7 +19,7 @@ type Post struct {
 
 type Posts []*Post
 
-func (p *Post) ToJSON(w io.Writer) error {
+func (p *Posts) ToJSON(w io.Writer) error {
 	e := json.NewEncoder(w)
 	return e.Encode(p)
 }
